@@ -1,9 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"github.com/diiegoburiti/go-book/app/configs"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	fmt.Println("hello world")
+
+	app := fiber.New()
+
+	configs.ConnectDB()
+
+	app.Listen(":6000")
 }
