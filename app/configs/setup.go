@@ -32,3 +32,10 @@ func ConnectDB() *mongo.Client {
 	fmt.Println("Connected to the database!")
 	return client
 }
+
+var Db *mongo.Client = ConnectDB()
+
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	collection := client.Database("go-book-api").Collection(collectionName)
+	return collection
+}
