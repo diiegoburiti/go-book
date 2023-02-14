@@ -1,4 +1,4 @@
-module github.com/diiegoburiti/wallet
+module github.com/diiegoburiti/go-book
 
 go 1.19
 
