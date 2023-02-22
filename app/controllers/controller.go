@@ -6,17 +6,12 @@ import (
 	"time"
 
 	"github.com/diiegoburiti/go-book/app/configs"
+	"github.com/diiegoburiti/go-book/app/models"
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type Book struct {
-	ID    primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Isbn  string             `json:"isbn,omitempty" bson:"isbn,omitempty"`
-	Title string             `json:"title" bson:"title,omitempty"`
-}
 
 type BookResponse struct {
 	Status  int        `json:"status"`
@@ -29,7 +24,7 @@ var bookCollection *mongo.Collection = configs.GetCollection(configs.Db, "books"
 
 func RegisterBook(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var book Book
+	var book models.Book
 
 	defer cancel()
 
@@ -41,7 +36,7 @@ func RegisterBook(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(BookResponse{Status: http.StatusBadRequest, Message: "Error", Data: &fiber.Map{"data": validationError.Error}})
 	}
 
-	newBook := Book{
+	newBook := models.Book{
 		ID:    primitive.NewObjectID(),
 		Isbn:  book.Isbn,
 		Title: book.Title,
