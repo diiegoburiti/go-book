@@ -69,3 +69,19 @@ func DeleteBook(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(BookResponse{Status: http.StatusCreated, Message: "Success", Data: &fiber.Map{"data": "Book deleted"}})
 }
+
+func FindBook(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var bookId = c.Params("bookId")
+	objectId, _ := primitive.ObjectIDFromHex(bookId)
+	var book models.Book
+
+	defer cancel()
+
+	err := bookCollection.FindOne(ctx, bson.M{"id": objectId}).Decode(&book)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(BookResponse{Status: http.StatusBadRequest, Message: "Error", Data: &fiber.Map{"data": err.Error}})
+	}
+
+	return c.Status(http.StatusOK).JSON(BookResponse{Status: http.StatusCreated, Message: "Success", Data: &fiber.Map{"data": book}})
+}
