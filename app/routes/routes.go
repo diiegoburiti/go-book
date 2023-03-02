@@ -7,6 +7,5 @@ import (
 
 func Routes(app *fiber.App) {
 	app.Post("/register-book", controllers.RegisterBook)
-	app.Delete("/delete-book/:id", controllers.DeleteBook)
-
+	app.Delete("/delete-book/:bookId", controllers.DeleteBook)
 }
