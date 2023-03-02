@@ -98,3 +98,45 @@ func GetBooks(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(BookResponse{Status: http.StatusCreated, Message: "Success", Data: &fiber.Map{"data": result}})
 }
+
+func UpdateBook(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var bookId = c.Params("bookId")
+	var book models.Book
+
+	objectId, _ := primitive.ObjectIDFromHex(bookId)
+
+	defer cancel()
+
+	//result, err := bookCollection.UpdateOne(ctx, bson.M{"id": bookId})
+	//if err != nil {
+	//	return c.Status(http.StatusInternalServerError).JSON(BookResponse{Status: http.StatusBadRequest, Message: "Error", Data: &fiber.Map{"data": err.Error}})
+	//}
+
+	if err := c.BodyParser(&book); err != nil {
+		c.Status(http.StatusBadRequest).JSON(BookResponse{Status: http.StatusBadRequest, Message: "Error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	validateFields := validate.Struct(&book)
+	if validateFields != nil {
+		return c.Status(http.StatusInternalServerError).JSON(BookResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": validateFields.Error()}})
+	}
+
+	editBook := bson.M{"title": book.Title, "isbn": book.Isbn}
+
+	result, err := bookCollection.UpdateOne(ctx, bson.M{"id": objectId}, bson.M{"$set": editBook})
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(BookResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	var updateBook models.Book
+	if result.MatchedCount == 1 {
+		err := bookCollection.FindOne(ctx, bson.M{"id": objectId}).Decode(&updateBook)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(BookResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+	}
+	return c.Status(http.StatusOK).JSON(BookResponse{Status: http.StatusCreated, Message: "Success", Data: &fiber.Map{"data": book}})
+
+}
